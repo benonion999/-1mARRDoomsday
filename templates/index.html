@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="revenue-countdown"></div>
+
+<script src="{{ url_for('static', filename='js/RevenueCountdown.js') }}"></script>
+<script>
+    new RevenueCountdown('revenue-countdown');
+</script>
+{% endblock %} 

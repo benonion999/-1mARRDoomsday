@@ -1,0 +1,780 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Metrics - Road to £1M ARR{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .metrics-dashboard {
+        width: 90%;
+        max-width: 1200px;
+        margin: 2rem auto;
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .metric-card {
+        background: rgba(42, 42, 42, 0.95);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .metric-title {
+        color: #888;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .metric-trend {
+        font-size: 0.9rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .trend-up {
+        color: #2ed573;
+        background: rgba(46, 213, 115, 0.1);
+    }
+
+    .trend-down {
+        color: #ff4757;
+        background: rgba(255, 71, 87, 0.1);
+    }
+
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        margin: 1rem 0;
+    }
+
+    .metric-stats {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: #888;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        color: white;
+        font-weight: 600;
+    }
+
+    .metrics-form {
+        display: none;
+        background: rgba(42, 42, 42, 0.95);
+        padding: 2rem;
+        border-radius: 16px;
+        margin-top: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        color: #888;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .form-group input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.8rem;
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #ff4757;
+    }
+
+    .submit-button {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .submit-button:hover {
+        background: #ff6b81;
+        transform: translateY(-2px);
+    }
+
+    .keyboard-hints {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        flex-wrap: wrap;
+        max-width: fit-content;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+    }
+
+    .keyboard-hint {
+        color: #888;
+        font-size: 0.9rem;
+        text-align: center;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .keyboard-hint:hover {
+        color: #ff4757;
+        background: rgba(255, 71, 87, 0.1);
+        border-color: rgba(255, 71, 87, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .reset-form {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .reset-warning {
+        background: rgba(255, 71, 87, 0.1);
+        padding: 2rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 71, 87, 0.2);
+    }
+
+    .reset-warning h3 {
+        color: #ff4757;
+        margin-bottom: 1rem;
+    }
+
+    .reset-button {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .reset-button:hover {
+        background: #ff6b81;
+        transform: translateY(-2px);
+    }
+
+    .graph-section {
+        margin-top: 3rem;
+        background: rgba(42, 42, 42, 0.95);
+        padding: 2rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .graph-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .graph-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .metric-selector {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.8rem;
+        border-radius: 8px;
+        color: white;
+        font-size: 0.9rem;
+        min-width: 200px;
+        cursor: pointer;
+    }
+
+    .time-range-selector {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.8rem;
+        border-radius: 8px;
+        color: white;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .metric-selector:focus,
+    .time-range-selector:focus {
+        outline: none;
+        border-color: #ff4757;
+    }
+
+    .metric-selector option,
+    .time-range-selector option {
+        background: #2a2a2a;
+        padding: 8px;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 400px;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .funnel-section, .growth-section {
+        margin-top: 3rem;
+        background: rgba(42, 42, 42, 0.95);
+        padding: 2rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .funnel-step {
+        margin: 1rem 0;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+    }
+
+    .step-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .conversion-rate {
+        color: #ff4757;
+        font-weight: bold;
+    }
+
+    .step-bar-container {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .step-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #ff4757 0%, #ff6b81 100%);
+        transition: width 0.5s ease;
+    }
+
+    .growth-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .growth-card {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        border-radius: 8px;
+    }
+
+    .growth-rate.positive {
+        color: #2ed573;
+    }
+
+    .growth-rate.negative {
+        color: #ff4757;
+    }
+
+    .populate-form {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .populate-button {
+        background: #2ed573;
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .populate-button:hover {
+        background: #26af5f;
+        transform: translateY(-2px);
+    }
+
+    .trend-select {
+        padding: 4px 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+        font-size: 0.9em;
+        margin-right: 8px;
+    }
+
+    .trend-value {
+        font-weight: bold;
+    }
+
+    .metric-stats {
+        display: flex;
+        align-items: center;
+        margin-top: 8px;
+    }
+
+    .metric-control-group {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .view-all-button {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 0.8rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .view-all-button:hover {
+        background: #ff6b81;
+        transform: translateY(-2px);
+    }
+
+    .date-selector-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        background: rgba(42, 42, 42, 0.95);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .date-selector-container label {
+        color: #fff;
+        font-size: 0.9rem;
+    }
+
+    .metrics-date-input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.8rem;
+        border-radius: 8px;
+        color: white;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .metrics-date-input:focus {
+        outline: none;
+        border-color: #ff4757;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="metrics-dashboard">
+    <h1>Daily Metrics</h1>
+    <div class="keyboard-hints">
+        <div class="keyboard-hint">⌨️ Ctrl + Shift + M to add metrics</div>
+        <div class="keyboard-hint">⚠️ Ctrl + Shift + R to reset data</div>
+    </div>
+    
+    <!-- Add this after the keyboard hints -->
+    <div class="date-selector-container">
+        <label for="metricsDate">Select Date:</label>
+        <input type="date" id="metricsDate" class="metrics-date-input" value="{{ yesterday_date }}">
+    </div>
+
+    <form method="POST" action="{{ url_for('populate_metrics') }}" class="populate-form">
+        <button type="submit" class="populate-button">Populate with Sample Data</button>
+    </form>
+
+    <!-- Add Metrics Form -->
+    <form method="POST" class="metrics-form">
+        <h2>Add Yesterday's Metrics</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Website Visits</label>
+                <input type="number" name="website_visits" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Signup Page Views</label>
+                <input type="number" name="signup_page_views" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Signups</label>
+                <input type="number" name="signups" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Connected Signups</label>
+                <input type="number" name="connected_signups" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Free to Paid</label>
+                <input type="number" name="free_to_paid" min="0" required>
+            </div>
+        </div>
+        <button type="submit" class="submit-button">Save Metrics</button>
+    </form>
+
+    <!-- Add this after the metrics form -->
+    <form method="POST" action="{{ url_for('reset_metrics') }}" class="reset-form" style="display: none;">
+        <div class="reset-warning">
+            <h3>⚠️ Warning: This will delete all metrics data</h3>
+            <button type="submit" class="reset-button">Reset All Data</button>
+        </div>
+    </form>
+
+    <!-- Existing Metrics Grid -->
+    <div class="metrics-grid">
+        {% for metric_name, metric_data in metrics.items() %}
+        <div class="metric-card">
+            <h3>{{ metric_name|replace('_', ' ') }}</h3>
+            <div class="metric-value">
+                {% if metric_name == 'ARR Pipeline' %}
+                    £{{ "{:,.2f}".format(metric_data.today) }}
+                {% else %}
+                    {{ metric_data.today }}
+                {% endif %}
+            </div>
+            <div class="metric-stats">
+                <select class="trend-select" onchange="updateTrendDisplay(this)">
+                    <option value="24h">24h</option>
+                    <option value="7d">7 days</option>
+                    <option value="30d">30 days</option>
+                </select>
+                <span class="trend-value" data-trends='{{ metric_data.trends|tojson }}'>
+                    {{ metric_data.trends['24h'] }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Add this after the metrics grid -->
+    <div class="funnel-section">
+        <div class="section-header">
+            <h2>Conversion Funnel</h2>
+        </div>
+        <div class="funnel-container">
+            {% for step, data in funnel_metrics.items() %}
+            <div class="funnel-step">
+                <div class="step-header">
+                    <span class="step-name">{{ step|replace('_', ' ')|title }}</span>
+                    <span class="conversion-rate">{{ "%.1f"|format(data.rate) }}%</span>
+                </div>
+                <div class="step-bar-container">
+                    <div class="step-bar" style="width: {{ data.rate }}%"></div>
+                </div>
+                <div class="step-details">
+                    <span class="detail-item">{{ data.previous }} → {{ data.current }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Update the graph section -->
+    <div class="graph-section">
+        <div class="graph-header">
+            <h2>Metrics Trend</h2>
+            <div class="graph-controls">
+                <select class="time-range-selector" id="timeRangeSelector">
+                    <option value="7">Last 7 days</option>
+                    <option value="14">Last 14 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                </select>
+                <div class="metric-control-group">
+                    <select class="metric-selector" id="compareSelector" multiple>
+                        <option value="website_visits">Website Visits</option>
+                        <option value="signup_page_views">Signup Page Views</option>
+                        <option value="signups">Signups</option>
+                        <option value="connected_signups">Connected Signups</option>
+                        <option value="free_to_paid">Free to Paid</option>
+                    </select>
+                    <button class="view-all-button" id="viewAllMetrics">View All</button>
+                </div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="metricsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Add WoW Growth section -->
+    <div class="growth-section">
+        <div class="section-header">
+            <h2>Week over Week Growth</h2>
+        </div>
+        <div class="growth-grid">
+            {% for metric, data in wow_growth.items() %}
+            <div class="growth-card">
+                <div class="growth-header">
+                    <span class="metric-name">{{ metric|replace('_', ' ')|title }}</span>
+                    <span class="growth-rate {% if data.growth > 0 %}positive{% else %}negative{% endif %}">
+                        {{ "%.1f"|format(data.growth) }}%
+                    </span>
+                </div>
+                <div class="growth-details">
+                    <div class="detail-row">
+                        <span class="label">Last Week:</span>
+                        <span class="value">{{ data.previous }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">This Week:</span>
+                        <span class="value">{{ data.current }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+    // Add keyboard shortcut (Ctrl + Shift + M) to toggle metrics form
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'M') {
+            const metricsForm = document.querySelector('.metrics-form');
+            metricsForm.style.display = metricsForm.style.display === 'none' ? 'block' : 'none';
+        }
+        // Add reset form toggle
+        if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+            const resetForm = document.querySelector('.reset-form');
+            resetForm.style.display = resetForm.style.display === 'none' ? 'block' : 'none';
+        }
+    });
+
+    // Initialize the chart
+    const ctx = document.getElementById('metricsChart').getContext('2d');
+    let metricsChart;
+
+    // Get metrics data from Flask
+    const metricsData = {{ metrics_history|tojson|safe }};
+
+    function getMetricColor(metricName) {
+        const colors = {
+            'website_visits': 'rgba(46, 213, 115, 1)',
+            'signup_page_views': 'rgba(255, 71, 87, 1)',
+            'signups': 'rgba(54, 162, 235, 1)',
+            'connected_signups': 'rgba(255, 159, 64, 1)',
+            'free_to_paid': 'rgba(153, 102, 255, 1)',
+            'ARR Pipeline': 'rgba(255, 215, 0, 1)'  // Gold color for ARR Pipeline
+        };
+        return colors[metricName] || 'rgba(255, 255, 255, 1)';
+    }
+
+    function filterDataByDays(data, days) {
+        const filteredData = {};
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - days);
+
+        for (const [metric, values] of Object.entries(data)) {
+            filteredData[metric] = values.filter(item => {
+                const itemDate = new Date(item.date);
+                return itemDate >= cutoffDate;
+            });
+        }
+        return filteredData;
+    }
+
+    function updateChart(selectedMetrics) {
+        if (metricsChart) {
+            metricsChart.destroy();
+        }
+
+        const days = parseInt(document.getElementById('timeRangeSelector').value);
+        const filteredData = filterDataByDays(metricsData, days);
+
+        const datasets = selectedMetrics.map(metricName => {
+            const metric = filteredData[metricName];
+            const color = getMetricColor(metricName);
+            return {
+                label: metricName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                data: metric.map(item => item.value),
+                borderColor: color,
+                backgroundColor: color.replace('1)', '0.1)'),
+                tension: 0.4,
+                fill: true
+            };
+        });
+
+        metricsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: filteredData[selectedMetrics[0]].map(item => item.date),
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#fff',
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(42, 42, 42, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#888',
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#888',
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        });
+    }
+
+    // Handle multiple metric selection
+    const compareSelector = document.getElementById('compareSelector');
+    compareSelector.addEventListener('change', (e) => {
+        const selectedMetrics = Array.from(e.target.selectedOptions).map(option => option.value);
+        if (selectedMetrics.length > 0) {
+            updateChart(selectedMetrics);
+        }
+    });
+
+    // Add time range selector event listener
+    document.getElementById('timeRangeSelector').addEventListener('change', () => {
+        const selectedMetrics = Array.from(compareSelector.selectedOptions).map(option => option.value);
+        if (selectedMetrics.length > 0) {
+            updateChart(selectedMetrics);
+        }
+    });
+
+    // Add View All button functionality
+    document.getElementById('viewAllMetrics').addEventListener('click', () => {
+        const allMetrics = Array.from(compareSelector.options).map(option => option.value);
+        
+        // Select all options in the select element
+        Array.from(compareSelector.options).forEach(option => {
+            option.selected = true;
+        });
+        
+        // Update the chart with all metrics
+        updateChart(allMetrics);
+    });
+
+    // Initialize with first metric and 30 days
+    compareSelector.options[0].selected = true;
+    updateChart(['website_visits']);
+
+    function updateTrendDisplay(select) {
+        const trendSpan = select.nextElementSibling;
+        const trends = JSON.parse(trendSpan.dataset.trends);
+        trendSpan.textContent = trends[select.value];
+        
+        // Update trend color
+        const trendValue = parseFloat(trends[select.value]);
+        trendSpan.style.color = trendValue >= 0 ? '#2ed573' : '#ff4757';
+    }
+
+    // Date selector functionality
+    const dateSelector = document.getElementById('metricsDate');
+    
+    dateSelector.addEventListener('change', async (e) => {
+        const selectedDate = e.target.value;
+        window.location.href = `/metrics?date=${selectedDate}`;
+    });
+
+    // Set max date to today
+    dateSelector.max = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %} 
