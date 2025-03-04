@@ -11,8 +11,21 @@ from functools import wraps
 app = Flask(__name__)
 CORS(app)
 
-# Set locale for currency formatting
-locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')
+# At the top of app.py, modify the locale setting
+try:
+    locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+    except locale.Error:
+        locale.setlocale(locale.LC_ALL, '')  # Use default locale
+
+# Create a helper function for currency formatting
+def format_currency(value):
+    try:
+        return locale.currency(value, grouping=True)
+    except locale.Error:
+        return f"£{value:,.2f}"  # Fallback formatting
 
 # Update the file paths to be relative to the app directory
 BASE_DIR = Path(__file__).resolve().parent
@@ -380,13 +393,13 @@ def index():
                          hours=hours,
                          minutes=minutes,
                          seconds=seconds,
-                         current_arr=locale.currency(current_arr, grouping=True),
-                         target_arr=locale.currency(target_arr, grouping=True),
-                         monthly_target=locale.currency(monthly_target, grouping=True),
+                         current_arr=format_currency(current_arr),
+                         target_arr=format_currency(target_arr),
+                         monthly_target=format_currency(monthly_target),
                          progress=progress,
-                         product_price=locale.currency(product_price, grouping=True),
+                         product_price=format_currency(product_price),
                          monthly_users="{:,}".format(current_users),
-                         monthly_revenue=locale.currency(monthly_revenue, grouping=True),
+                         monthly_revenue=format_currency(monthly_revenue),
                          users_needed=users_needed_formatted,
                          monthly_users_needed=monthly_users_formatted,
                          probability=probability_formatted,
