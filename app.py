@@ -1,11 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import json
 import os
 import random
 from pathlib import Path
-from functools import wraps
 
 app = Flask(__name__)
 CORS(app)
@@ -401,28 +400,7 @@ def index():
                          latest_metrics=latest_metrics,  # Renamed from todays_metrics
                          user_history=reversed(users_data['history'][-5:]))
 
-def check_auth(username, password):
-    """Check if a username/password combination is valid."""
-    return username == os.environ.get('ADMIN_USERNAME') and password == os.environ.get('ADMIN_PASSWORD')
-
-def authenticate():
-    """Sends a 401 response that enables basic auth"""
-    return Response(
-        'Could not verify your access level for that URL.\n'
-        'You have to login with proper credentials', 401,
-        {'WWW-Authenticate': 'Basic realm="Login Required"'})
-
-def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return authenticate()
-        return f(*args, **kwargs)
-    return decorated
-
 @app.route('/metrics', methods=['GET', 'POST'])
-@requires_auth
 def metrics():
     # Get selected date from query parameter, default to yesterday
     selected_date = request.args.get('date')
