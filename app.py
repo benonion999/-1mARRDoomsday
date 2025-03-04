@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
 from flask_cors import CORS
 from datetime import datetime, timedelta
-import locale
 import json
 import os
 import random
@@ -11,21 +10,16 @@ from functools import wraps
 app = Flask(__name__)
 CORS(app)
 
-# At the top of app.py, modify the locale setting
-try:
-    locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')
-except locale.Error:
-    try:
-        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-    except locale.Error:
-        locale.setlocale(locale.LC_ALL, '')  # Use default locale
-
 # Create a helper function for currency formatting
 def format_currency(value):
+    """Format a number as GBP currency without relying on locale"""
     try:
-        return locale.currency(value, grouping=True)
-    except locale.Error:
-        return f"£{value:,.2f}"  # Fallback formatting
+        # Format with comma as thousand separator and 2 decimal places
+        formatted = "{:,.2f}".format(value)
+        # Add pound symbol
+        return f"£{formatted}"
+    except (ValueError, TypeError):
+        return f"£0.00"
 
 # Update the file paths to be relative to the app directory
 BASE_DIR = Path(__file__).resolve().parent
