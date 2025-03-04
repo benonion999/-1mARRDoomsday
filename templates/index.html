@@ -1,10 +1,108 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div id="revenue-countdown"></div>
+<div class="container">
+    <h1>Road to £1M ARR</h1>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: {{ progress }}%"></div>
+        <span class="progress-text">
+            {{ current_arr }} / {{ target_arr }}
+        </span>
+    </div>
+    <div class="monthly-target">
+        <div class="target-row">
+            <div class="target-item">
+                <span class="target-label">Monthly ARR Target:</span>
+                <strong>{{ monthly_target }}</strong>
+            </div>
+            <div class="target-item">
+                <span class="target-label">New Users Needed per Month:</span>
+                <strong>{{ monthly_users_needed }}</strong>
+            </div>
+        </div>
+    </div>
+    <div class="countdown">
+        <div class="time-block">
+            <span class="number">{{ days }}</span>
+            <span class="label">Days</span>
+        </div>
+        <div class="time-block">
+            <span class="number">{{ hours }}</span>
+            <span class="label">Hours</span>
+        </div>
+        <div class="time-block">
+            <span class="number">{{ minutes }}</span>
+            <span class="label">Minutes</span>
+        </div>
+        <div class="time-block">
+            <span class="number">{{ seconds }}</span>
+            <span class="label">Seconds</span>
+        </div>
+    </div>
+    <div class="metrics-container">
+        <h2>Product Metrics</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Product Price</div>
+                <div class="metric-value">{{ product_price }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Current Paying Users</div>
+                <div class="metric-value">{{ monthly_users }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Monthly Revenue</div>
+                <div class="metric-value">{{ monthly_revenue }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Users Needed for £1M ARR</div>
+                <div class="metric-value">{{ users_needed }}</div>
+            </div>
+            <div class="metric-card probability-card">
+                <div class="metric-label">Probability of Success</div>
+                <div class="metric-value" style="color: {{ probability_color }}">
+                    {{ probability }}%
+                </div>
+                <div class="probability-bar" style="background: linear-gradient(90deg, {{ probability_color }} {{ probability }}%, rgba(255, 255, 255, 0.05) {{ probability }}%)"></div>
+            </div>
+        </div>
+    </div>
+    <div class="user-management" style="display: none;">
+        <h2>Add New Users</h2>
+        <form method="POST" class="add-users-form">
+            <div class="form-group">
+                <input type="number" name="new_users" min="1" placeholder="Number of new users" required>
+                <button type="submit">Add Users</button>
+            </div>
+        </form>
+        
+        <div class="user-history">
+            <h3>Recent Updates</h3>
+            <div class="history-list">
+                {% for entry in user_history %}
+                <div class="history-item">
+                    <span class="history-date">{{ entry.date }}</span>
+                    <span class="history-added">+{{ entry.added }}</span>
+                    <span class="history-total">Total: {{ entry.total }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-<script src="{{ url_for('static', filename='js/RevenueCountdown.js') }}"></script>
+{% block scripts %}
 <script>
-    new RevenueCountdown('revenue-countdown');
+    setTimeout(function() {
+        window.location.reload();
+    }, 1000);
+
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'U') {
+            const userManagement = document.querySelector('.user-management');
+            userManagement.style.display = userManagement.style.display === 'none' ? 'block' : 'none';
+        }
+    });
 </script>
 {% endblock %} 
